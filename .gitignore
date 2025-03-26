@@ -1,0 +1,10 @@
+models/
+mlruns/
+LibreTranslate/
+__pycache__/
+*.pyc
+test.js 
+test.ipynb
+.venvgit 
+.venv/
+.DS_Store
