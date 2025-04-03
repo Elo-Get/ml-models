@@ -3,15 +3,15 @@ import joblib
 import requests
 import json
 import pandas as pd
-from typing import Tuple
+from typing import List, Tuple
 from datasets import load_dataset
 from sklearn.feature_extraction.text import TfidfVectorizer
+from services.translater import Translater
 
-class PreProcessing:
+class PreProcessing(Translater):
     
-    def __init__(self, vectorizer_path: str = "vectorizer.pkl"):
+    def __init__(self, vectorizer_path: str = "./models/vectorizer.pkl"):
         self.vectorizer_path = vectorizer_path
-        
         if os.path.exists(self.vectorizer_path):
             self.vectorizer = joblib.load(self.vectorizer_path)
             print("Vectorizer loaded from save.")
@@ -19,24 +19,11 @@ class PreProcessing:
             self.vectorizer = TfidfVectorizer(stop_words='english', max_features=1000)
             print("New vectorizer created.")
     
-    def prepare_text(self, text: str):
+    def vectorize_texts(self, texts: List[str]):
         """
-        Traduit un texte en anglais et le vectorise.
+        Prépare le texte pour la vectorisation.
         """
-        url = 'http://localhost:5400/translate'
-        myobj = {
-            "q": text,
-            "source": "fr",
-            "target": "en",
-            "format": "text",
-            "alternatives": 1,
-        }
-        headers = {'Content-type': 'application/json'}
-
-        response = requests.post(url, json=myobj, headers=headers)
-        translated_text = json.loads(response.text)['translatedText']
-        
-        return self.vectorizer.transform([translated_text])  # Correction : besoin d'une liste
+        return self.vectorizer.transform(texts) 
     
     def get_dataset(self) -> Tuple[pd.DataFrame]:
         """
@@ -59,3 +46,4 @@ class PreProcessing:
         y_test = data_test['label']
         
         return X_train, y_train, X_test, y_test
+    
